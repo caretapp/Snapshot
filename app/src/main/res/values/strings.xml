@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Snapshot</string>
+    <string name="made_by">made by Caret</string>
+    <string name="enable_acc">Tap here to enable the accessibility service</string>
+    <string name="enable_draw">Tap Here to enable draw over permissions</string>
+    <string name="enable_storage">Tap Here to enable storage access for a folder</string>
+    <string name="go">GO!</string>
+    <string name="nice">Nice!</string>
+    <string name="well_done">Well Done!</string>
+    <string name="snapshot_exp">1. Drag to move.\n\n2. Open whichever app and activity.\n\n3. Double tap them icon to record a Snapshot!\n\n4. Tap this text to minimize it!</string>
+    <string name="alert_title">SnapShot Recorded!</string>
+    <string name="alert_msg">Nice! You can find the screenshot in the usual screenshots folder. The elements should be waiting in a file in the folder you specified earlier.\n\nFeel free to blur the screenshot or change any element info for privacy sake.\n\n\t\tThanks!</string>
+</resources>
