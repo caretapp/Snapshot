@@ -10,6 +10,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 
 import es.dmoral.toasty.Toasty;
 
@@ -68,16 +71,22 @@ public class utils {
 		}
 	}
 
-	public static void writeToUriFile(Context context, Uri f, String data){
+	public static boolean writeToUriFile(Context context, Uri f, String data){
 		try {
 			OutputStream outputStream = context.getContentResolver().openOutputStream( f, "wa" );
 			outputStream.write(data.getBytes());
 			outputStream.close();
 			utils.Echo("writeToUriFile", "Wrote data" + data.length() + " to " + f.getPath(), 1);
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			utils.Echo("writeToUriFile", "File write failed: " + e, 3);
+			utils.Echo(context, "writeToUriFile", "File write failed: " + e, 3, true);
+			Writer writer = new StringWriter();
+			e.printStackTrace(new PrintWriter(writer));
+			String s = writer.toString();
+			home.logInter.write( s );
 		}
+		return false;
 	}
 
 	public static boolean isAccessibilitySettingsOn(Context context) {
@@ -89,6 +98,10 @@ public class utils {
 					android.provider.Settings.Secure.ACCESSIBILITY_ENABLED);
 		} catch (Settings.SettingNotFoundException e) {
 			e.printStackTrace();
+			Writer writer = new StringWriter();
+			e.printStackTrace(new PrintWriter(writer));
+			String s = writer.toString();
+			home.logInter.write( s );
 		}
 		TextUtils.SimpleStringSplitter mStringColonSplitter = new TextUtils.SimpleStringSplitter(':');
 		if ( accessibilityEnabled == 1 ) {

@@ -29,8 +29,8 @@ public class screenReader extends AccessibilityService {
 		}
 	}
 
-	public void takeScreenShot() {
-		performGlobalAction(GLOBAL_ACTION_TAKE_SCREENSHOT);
+	public boolean takeScreenShot() {
+		return performGlobalAction(GLOBAL_ACTION_TAKE_SCREENSHOT);
 	}
 
 	public void nodeToArray(AccessibilityNodeInfo node) {

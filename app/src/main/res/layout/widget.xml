@@ -4,16 +4,16 @@
     android:id="@+id/widget_root"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:alpha="0.8"
-    android:background="@drawable/round_diag"
-    android:gravity="center">
+    android:gravity="center"
+    android:orientation="horizontal">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/widget_card"
             android:layout_width="84dp"
             android:layout_height="84dp"
             android:layout_gravity="center"
@@ -38,10 +38,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="0dp"
+        android:background="@drawable/round_diag"
         android:fontFamily="sans-serif-medium"
-        android:padding="4dp"
+        android:padding="8dp"
         android:text="@string/snapshot_exp"
-        android:textColor="#000000"
+        android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:visibility="visible" />
 

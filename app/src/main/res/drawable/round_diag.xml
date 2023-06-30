@@ -1,96 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version="1.0" encoding="UTF-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#B5000000"/>
 
-    <item>
-        <rotate
-            android:fromDegrees="66"
-            android:toDegrees="0"
-            android:pivotY="50%"
-            android:pivotX="50%">
-            <shape>
-                <gradient
-                    android:type="sweep"
-                    android:centerX="0.3"
-                    android:centerY="0.5"
-                    android:startColor="#FFFFFF"
-                    android:centerColor="@android:color/transparent"
-                    android:endColor="@android:color/transparent"/>
-            </shape>
-        </rotate>
-    </item>
-    <item>
-        <rotate android:fromDegrees="290"
-            android:toDegrees="0"
-            android:pivotY="40%"
-            android:pivotX="30%">
-            <shape>
-                <gradient android:type="sweep"
-                    android:centerX="0.8"
-                    android:centerY="0.3"
-                    android:startColor="#FFFFFF"
-                    android:centerColor="@android:color/transparent"
-                    android:endColor="@android:color/transparent"/>
-            </shape>
-        </rotate>
-    </item><item>
-    <rotate android:fromDegrees="18"
-        android:toDegrees="0"
-        android:pivotY="40%"
-        android:pivotX="30%">
-        <shape>
-            <gradient
-                android:type="sweep"
-                android:centerX="0.1"
-                android:centerY="0.5"
-                android:startColor="#00FFC4"
-                android:centerColor="@android:color/transparent"
-                android:endColor="@android:color/transparent"/> </shape>
-    </rotate>
-</item>
-    <item>
-        <rotate
-            android:fromDegrees="280"
-            android:toDegrees="0"
-            android:pivotY="50%"
-            android:pivotX="30%"><shape>
-            <gradient
-                android:type="sweep"
-                android:centerX="0.6"
-                android:centerY="0.7"
-                android:startColor="#FFF200"
-                android:centerColor="@android:color/transparent"
-                android:endColor="@android:color/transparent"/>
-        </shape>
-        </rotate>
-    </item>
-    <item>
-        <rotate
-            android:fromDegrees="0"
-            android:toDegrees="0"
-            android:pivotY="50%"
-            android:pivotX="30%">
-            <shape>
-                <corners
-                    android:radius="16dp"
-                    />
-                <padding
-                    android:left="0dp"
-                    android:top="0dp"
-                    android:right="0dp"
-                    android:bottom="0dp"
-                    />
-                <stroke
-                    android:width="3dp"
-                    android:color="#ff000000"
-                    />
-                <gradient
-                    android:type="sweep"
-                    android:centerX="0.0"
-                    android:centerY="0.0"
-                    android:startColor="#0099FF"
-                    android:centerColor="@android:color/transparent"
-                    android:endColor="@android:color/transparent"/>
-            </shape>
-        </rotate>
-    </item>
-</layer-list>
+    <stroke android:width="3dp"
+        android:color="#ff000000" />
+
+    <padding android:left="1dp"
+        android:top="1dp"
+        android:right="1dp"
+        android:bottom="1dp" />
+
+    <corners android:radius="7dp" />
+</shape>

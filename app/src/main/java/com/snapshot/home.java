@@ -1,5 +1,8 @@
 package com.snapshot;
 
+import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 public class home extends AppCompatActivity {
@@ -25,6 +30,10 @@ public class home extends AppCompatActivity {
 	private TextView folderText;
 	private TextView logText;
 	private Context context;
+	public interface LogInter {
+		void write(String msg);
+	}
+	public static LogInter logInter;
 	private final ArrayList<Boolean> perms = new ArrayList<>(Arrays.asList(false, false, false));
 	private final ActivityResultLauncher<Intent> drawOverPermissionLauncher =
 			registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -32,9 +41,11 @@ public class home extends AppCompatActivity {
 					drawText.setText( context.getResources().getString( R.string.nice ) );
 					drawText.setEnabled(false);
 					perms.set(0, true);
+					home.logInter.write( "granted draw over permissions" );
 					if ( ! perms.contains( false ) ) {
 						utils.Echo(context, "", "all set! use the widget", 1, true);
 						startService(new Intent(context, snaphotwidget.class));
+						home.logInter.write( "showing widget" );
 					} else {
 						utils.Echo(context, "", "enable the other permissions!", 2, true);
 					}
@@ -47,8 +58,10 @@ public class home extends AppCompatActivity {
 					accText.setText( context.getResources().getString( R.string.well_done ) );
 					accText.setEnabled(false);
 					perms.set(1, true);
+					home.logInter.write( "granted accessibility permissions" );
 					if ( ! perms.contains( false ) ) {
 						utils.Echo(context, "", "all set! use the widget", 1, true);
+						home.logInter.write( "showing widget" );
 						startService(new Intent(context, snaphotwidget.class));
 					} else {
 						utils.Echo(context, "", "enable the other permissions!", 2, true);
@@ -67,9 +80,11 @@ public class home extends AppCompatActivity {
 					folderText.setText( context.getResources().getString( R.string.nice ) );
 					folderText.setEnabled(false);
 					perms.set(2, true);
+					home.logInter.write( "granted storage permissions" );
 					if ( ! perms.contains( false ) ) {
 						utils.Echo(context, "", "all set! use the widget", 1, true);
 						startService(new Intent(context, snaphotwidget.class));
+						home.logInter.write( "showing widget" );
 					} else {
 						utils.Echo(context, "", "enable the other permissions!", 2, true);
 					}
@@ -78,6 +93,7 @@ public class home extends AppCompatActivity {
 				}
 			});
 
+	@SuppressLint("SetTextI18n")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -88,6 +104,24 @@ public class home extends AppCompatActivity {
 		drawText = findViewById(R.id.acc_draw);
 		folderText = findViewById(R.id.acc_folder);
 		logText = findViewById(R.id.log_text);
+		ArrayList<String> logData = new ArrayList<>();
+		logInter = msg -> {
+			logData.add( new Date() + ": " + msg );
+			logText.post(()->{
+				logText.setText( String.join("\n", logData) );
+			});
+		};
+		logInter.write("This is a log. Text will be written here as Snapshot runs to explain things. Tap this text to copy it to your clipboard for pasting.");
+		logText.setOnClickListener(v->{
+			if ( logText.getText() != null ) {
+				ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+				ClipData clip = ClipData.newPlainText("log data", logText.getText().toString());
+				clipboard.setPrimaryClip(clip);
+				utils.Echo(context, "", "Log copied to clipboard!", 1, true);
+			} else {
+				utils.Echo(context, "", "Failed to copy to clipboard!", 3, true);
+			}
+		});
 
 		accText.setOnClickListener(v -> {
 			accPermissionLauncher.launch( new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS) );
@@ -96,7 +130,7 @@ public class home extends AppCompatActivity {
 			drawOverPermissionLauncher.launch( new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION) );
 		});
 		folderText.setOnClickListener(v->{
-			folderResultLauncher.launch(Uri.parse("content://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
+			folderResultLauncher.launch(Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
 		});
 	}
 

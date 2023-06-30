@@ -3,7 +3,9 @@ package com.snapshot;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -12,10 +14,17 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -53,6 +62,8 @@ public class snaphotwidget extends Service {
 				v.setVisibility(View.GONE);
 			});
 
+			CardView cardView = mainView.findViewById( R.id.widget_card );
+
 			mainView.findViewById(R.id.widget_root).setOnTouchListener(new View.OnTouchListener() {
 				private int taps = 0;
 				private int initialX;
@@ -69,8 +80,18 @@ public class snaphotwidget extends Service {
 							initialY = params.y;
 							initialTouchX = event.getRawX();
 							initialTouchY = event.getRawY();
+							if ( mainView.getAlpha() != 0.5f ) {
+								mainView.post(() -> {
+									mainView.setAlpha(0.5f);
+								});
+							}
 							return true;
 						case MotionEvent.ACTION_UP:
+							if ( mainView.getAlpha() != 1f ) {
+								mainView.post(() -> {
+									mainView.setAlpha(1f);
+								});
+							}
 							if ( hintText.getVisibility() == View.GONE ) {
 								int diffX = (int) (event.getRawY() - initialTouchY);
 								int diffY = (int) (event.getRawX() - initialTouchX);
@@ -78,14 +99,21 @@ public class snaphotwidget extends Service {
 								if ( diffX == 0 && diffY == 0 ) {
 									taps++;
 									if (taps >= 2) {
-										utils.Echo("", "on up: taps >= 2 " + taps, 1);
+										Animation rotation = AnimationUtils.loadAnimation(mainView.getContext(), R.anim.rotate);
+										rotation.setFillAfter(true);
+
+										utils.Echo(mainView.getContext(), "", "Running! Please wait...", 1, true);
+										home.logInter.write( "On double tap of widget" );
 										mainView.post(() -> {
-											mainView.setVisibility(View.GONE);
+											mainView.setEnabled(false);
+											cardView.setCardBackgroundColor(
+													ContextCompat.getColor(mainView.getContext(), R.color.grey));
+											mainView.clearAnimation();
+											mainView.startAnimation(rotation);
 										});
-										utils.Echo("", "on up: start", 1);
 										new Thread(() -> {
 											int attempts = 0;
-											int max = 30 * 1000;
+											int max = 10 * 1000;
 											List<ArrayList<String>> queryMap = new ArrayList<>();
 											while (attempts < max) {
 												attempts += 10;
@@ -106,12 +134,13 @@ public class snaphotwidget extends Service {
 													} catch (Exception ignore1) {
 													}
 												}
-												if (attempts == 15000) {
-													utils.Echo(mainView.getContext(), "", "timing out in " + (max - attempts) / 1000 + " seconds", 2, false);
+												if (attempts == 5000) {
+													utils.Echo(mainView.getContext(), "", "Timing out in " + (max - attempts) / 1000 + " seconds", 2, true);
 												}
 											}
 											if (attempts <= max) {
 												if ( queryMap.size() > 0 ) {
+													home.logInter.write( "Found " + queryMap.size() + " elements" );
 													//write contents
 													if ( home.folderUri != null ) {
 														DocumentFile f = DocumentFile.fromTreeUri(mainView.getContext(), home.folderUri);
@@ -120,17 +149,59 @@ public class snaphotwidget extends Service {
 														DocumentFile f1 = f.findFile("snapshot.txt");
 														assert f1 != null;
 														for ( ArrayList<String> arr : queryMap ) {
-															utils.writeToUriFile( mainView.getContext(), f1.getUri(), String.join("\n", arr)+"\n---\n" );
+															if ( ! utils.writeToUriFile( mainView.getContext(), f1.getUri(), String.join("\n", arr)+"\n---\n" ) ) {
+																utils.Echo(mainView.getContext(), "", "An error occurred writing the elements!", 3, true);
+																home.logInter.write( "Write errors" );
+																break;
+															}
 														}
-														screenReader.instance.get().takeScreenShot();
-														success = true;
+														if ( screenReader.instance.get().takeScreenShot() && queryMap.size() > 0 ) {
+															success = true;
+															mainView.post(() -> {
+																cardView.setCardBackgroundColor(
+																		ContextCompat.getColor(mainView.getContext(), R.color.optional));
+															});
+															mainView.postDelayed(() -> mainView.setVisibility(View.GONE), 2000);
+															utils.Echo(mainView.getContext(), "", "Success!", 1, true);
+															home.logInter.write( "Captured screenshot!" );
+														} else {
+															utils.Echo(mainView.getContext(), "", "Failed to take a screenshot!", 2, true);
+															home.logInter.write( "Screenshot failed!" );
+														}
 													}
+												} else {
+													mainView.post(() -> {
+														cardView.setCardBackgroundColor(
+																ContextCompat.getColor(mainView.getContext(), R.color.yellow_100));
+													});
+													utils.Echo(mainView.getContext(), "", "Elements was empty!", 2, true);
+													home.logInter.write( "Snapshot was empty!" );
 												}
 											} else {
 												utils.Echo(mainView.getContext(), "", "Snapshot timed out!", 2, true);
+												mainView.post(() -> {
+													cardView.setCardBackgroundColor(
+															ContextCompat.getColor(mainView.getContext(), R.color.required));
+												});
+												home.logInter.write( "Snapshot timed out!" );
+											}
+											if ( ! success ) {
+												mainView.post(() -> {
+													cardView.setCardBackgroundColor(
+															ContextCompat.getColor(mainView.getContext(), R.color.black));
+													mainView.setEnabled(true);
+												});
 											}
 										}).start();
+									} else {
+										mainView.post(() -> {
+											cardView.setCardBackgroundColor(
+													ContextCompat.getColor(mainView.getContext(), R.color.black));
+										});
 									}
+									mainView.post(() -> {
+										mainView.clearAnimation();
+									});
 								}
 							} else {
 								utils.Echo(mainView.getContext(), "", "close the text first!", 2, true);
