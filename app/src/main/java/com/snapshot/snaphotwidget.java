@@ -99,17 +99,12 @@ public class snaphotwidget extends Service {
 								if ( diffX == 0 && diffY == 0 ) {
 									taps++;
 									if (taps >= 2) {
-										Animation rotation = AnimationUtils.loadAnimation(mainView.getContext(), R.anim.rotate);
-										rotation.setFillAfter(true);
-
 										utils.Echo(mainView.getContext(), "", "Running! Please wait...", 1, true);
 										home.logInter.write( "On double tap of widget" );
 										mainView.post(() -> {
 											mainView.setEnabled(false);
 											cardView.setCardBackgroundColor(
 													ContextCompat.getColor(mainView.getContext(), R.color.grey));
-											mainView.clearAnimation();
-											mainView.startAnimation(rotation);
 										});
 										new Thread(() -> {
 											int attempts = 0;
@@ -149,6 +144,7 @@ public class snaphotwidget extends Service {
 														DocumentFile f1 = f.findFile("snapshot.txt");
 														assert f1 != null;
 														for ( ArrayList<String> arr : queryMap ) {
+															home.logInter.write( String.join("\n", arr)+"\n---\n" );
 															if ( ! utils.writeToUriFile( mainView.getContext(), f1.getUri(), String.join("\n", arr)+"\n---\n" ) ) {
 																utils.Echo(mainView.getContext(), "", "An error occurred writing the elements!", 3, true);
 																home.logInter.write( "Write errors" );
