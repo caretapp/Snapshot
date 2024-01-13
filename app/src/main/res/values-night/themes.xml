@@ -15,4 +15,18 @@
         <item name="android:scrollbarSize">4dp</item>
         <item name="android:scrollbarThumbVertical">@color/white</item>
     </style>
+
+    <style name="hints_title" parent="Base.TextAppearance.AppCompat.Title">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:textSize">36sp</item>
+    </style>
+    <style name="hints_content" parent="Base.TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:gravity">start|top</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:lineSpacingExtra">8dp</item>
+    </style>
 </resources>

@@ -1,6 +1,7 @@
 package com.snapshot;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.view.accessibility.AccessibilityEvent;
@@ -10,6 +11,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -29,10 +31,6 @@ public class screenReader extends AccessibilityService {
 		}
 	}
 
-	public boolean takeScreenShot() {
-		return performGlobalAction(GLOBAL_ACTION_TAKE_SCREENSHOT);
-	}
-
 	public void nodeToArray(AccessibilityNodeInfo node) {
 		int count = node.getChildCount();
 		for (int i = 0; i < count; i++) {
@@ -44,7 +42,7 @@ public class screenReader extends AccessibilityService {
 				if ( child.getViewIdResourceName() != null ) {
 					childAttrs.add( child.getViewIdResourceName() );
 				} else {
-					childAttrs.add( "unknown" );
+					childAttrs.add( "" );
 				} //res
 				if ( child.getText() != null ) { childAttrs.add( child.getText().toString() ); } else { childAttrs.add(""); } //text
 				if ( child.getContentDescription() != null ) { childAttrs.add( child.getContentDescription().toString() ); } else { childAttrs.add(""); } //desc
@@ -69,10 +67,13 @@ public class screenReader extends AccessibilityService {
 						processFuture = CompletableFuture.runAsync(() -> {
 							queryMap.clear();
 							nodeToArray(finalNode);
+							queryQueue.offer(queryMap);
 							if ( queryQueue.peek() != null ) {
-								queryQueue.poll();
+								List<ArrayList<String>> map = queryQueue.poll();
+								if ( map != null && map.size() > 0 ) {
+									home.snapInter.add( map );
+								}
 							}
-							queryQueue.offer( queryMap );
 							finalNode.recycle();
 						});
 					}
@@ -113,10 +114,25 @@ public class screenReader extends AccessibilityService {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		utils.basicNotification.cancel(1);
 	}
 
 	@Override
 	public int onStartCommand (Intent intent, int flags, int startId) {
+		try {
+			utils.basicNotification.build(getApplicationContext(), "Running",
+					"Services running",
+					String.format(Locale.getDefault(), "%s", "Don't kill my app!"),
+					"Services",
+					false,
+					true,
+					NotificationManager.IMPORTANCE_HIGH
+			);
+			startForeground(1, utils.basicNotification.getNotification());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		processFuture = CompletableFuture.runAsync(() -> {});
 		return START_NOT_STICKY;
 	}
 }

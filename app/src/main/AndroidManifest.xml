@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -39,11 +40,6 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/screenreaderconfig" />
         </service>
-        <service
-            android:name=".snaphotwidget"
-            android:enabled="true"
-            android:exported="false"
-            android:stopWithTask="true" />
 
         <meta-data
             android:name="preloaded_fonts"
